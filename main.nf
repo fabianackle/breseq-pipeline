@@ -95,10 +95,11 @@ workflow {
     reads_ch = Channel.fromFilePairs(params.reads, checkIfExists: true)
 
     multiqc_files_ch = Channel.empty()
+
     TRIMMOMATIC(reads_ch)
     FASTQC(reads_ch)
-
-    //BRESEQ(TRIMMOMATIC.out.reads)
+    BRESEQ(TRIMMOMATIC.out.reads)
+    
     multiqc_files_ch = multiqc_files_ch.mix(FASTQC.out.stats)
     multiqc_files_ch = multiqc_files_ch.mix(TRIMMOMATIC.out.log)
     multiqc_files_ch = multiqc_files_ch.collect()
