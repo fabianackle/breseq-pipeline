@@ -12,9 +12,9 @@ process TRIMMOMATIC {
 
     output:
     tuple val(sample_id), path("${sample_id}_R1_trim_paired.fastq.gz"), path("${sample_id}_R2_trim_paired.fastq.gz"), emit: reads
-    path("${sample_id}.quality_read_trimm_info.txt"), emit: log
 
     script:
+    def illumina_adapters = file(params.illumina_adapters)
     """
     trimmomatic PE \\
         -threads ${task.cpus} \\
@@ -22,10 +22,9 @@ process TRIMMOMATIC {
         ${reads[0]} ${reads[1]} \\
         ${sample_id}_R1_trim_paired.fastq.gz ${sample_id}_R1_trim_unpaired.fastq.gz \\
         ${sample_id}_R2_trim_paired.fastq.gz ${sample_id}_R2_trim_unpaired.fastq.gz \\
-        ILLUMINACLIP:${params.illumina_adapters}:2:30:10:2 \\
+        ILLUMINACLIP:${illumina_adapters}:2:30:10:2 \\
         SLIDINGWINDOW:4:12 \\
-        MINLEN:100 \\
-        2> ${sample_id}.quality_read_trimm_info.txt
+        MINLEN:100
     """
 }
 
@@ -40,15 +39,15 @@ process BRESEQ {
 
     output:
     path("$sample_id"), emit: results
-    path("${sample_id}.breseq.log"), emit: log
 
     script:
+    def reference_seq = file(params.reference_seq)
     """
     breseq \\
-        -r ${params.reference} \\
+        -j ${task.cpus} \\
+        -r ${reference_seq} \\
         -o ${sample_id} \\
-        ${read1} ${read2} \\
-        &> ${sample_id}.breseq.log
+        ${read1} ${read2}
     """
 }
 

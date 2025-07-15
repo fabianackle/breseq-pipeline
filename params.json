@@ -1,6 +1,6 @@
 {
     "reads": "data/*_R{1,2}.fastq.gz",
-    "reference": "M.smegmatis_mc2_Fully_annotated.gbk",
-    "sample_ids": ["MPE003", "MPE004"],
-    "illumina_adapters": "data/NexteraPE-PE.fa"
+    "reference_seq": "data/msmeg_reference.gbk",
+    "illumina_adapters": "data/NexteraPE-PE.fa",
+    "outdir": "results"
 }
