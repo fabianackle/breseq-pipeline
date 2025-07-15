@@ -1,0 +1,7 @@
+module_order:
+  - fastqc
+  - trimmomatic
+
+table_sample_merge:
+  "R1": "_R1"
+  "R2": "_R2"
