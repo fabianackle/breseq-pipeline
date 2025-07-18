@@ -99,13 +99,13 @@ process MULTIQC {
 /* Workflow */
 workflow {
     reads_ch = Channel.fromFilePairs(params.reads, checkIfExists: true)
-    reference_ch = Channel.fromPath(params.params.reference_seq, checkIfExists: true)
+    reference_ch = Channel.fromPath(params.reference_seq, checkIfExists: true)
     illumina_adapters_ch = Channel.fromPath(params.illumina_adapters, checkIfExists: true)
 
     multiqc_config_ch = Channel.fromPath("multiqc_config.yml", checkIfExists: true)
     multiqc_files_ch = Channel.empty()
 
-    TRIMMOMATIC(reads_ch)
+    TRIMMOMATIC(reads_ch.combine(reference_ch))
     FASTQC(reads_ch)
     BRESEQ(TRIMMOMATIC.out.reads.combine(reference_ch))
     
