@@ -5,6 +5,8 @@ nextflow.enable.dsl = 2
 /* Modules */
 process TRIMMOMATIC {
     conda "bioconda::trimmomatic=0.39"
+    container "oras://community.wave.seqera.io/library/trimmomatic:0.39--e7585821f0006c2f"
+
     tag "$sample_id"
 
     input:
@@ -32,6 +34,8 @@ process TRIMMOMATIC {
 
 process BRESEQ {
     conda "bioconda::breseq=0.39.0"
+    container "oras://community.wave.seqera.io/library/breseq:0.39.0--688502c15205a10f"
+
     tag "$sample_id"
 
     publishDir params.outdir, mode: 'copy'
@@ -55,6 +59,8 @@ process BRESEQ {
 
 process FASTQC {
     conda "bioconda::fastqc=0.12.1"
+    container "oras://community.wave.seqera.io/library/fastqc:0.12.1--104d26ddd9519960"
+
     tag "$sample_id"
 
     input:
@@ -72,6 +78,8 @@ process FASTQC {
 
 process MULTIQC {
     conda "bioconda::multiqc=1.28"
+    container "oras://community.wave.seqera.io/library/multiqc:1.28--d466e41d58d6d704"
+
     tag "MultiQC"
 
     publishDir params.outdir, mode: 'copy'
