@@ -10,14 +10,13 @@ process TRIMMOMATIC {
     tag "$sample_id"
 
     input:
-    tuple val(sample_id), path(reads)
+    tuple val(sample_id), path(reads), path(illumina_adapters)
 
     output:
     tuple val(sample_id), path("${sample_id}_R1_trim_paired.fastq.gz"), path("${sample_id}_R2_trim_paired.fastq.gz"), emit: reads
     path("${sample_id}_trim_out.log"), emit: log
 
     script:
-    def illumina_adapters = file(params.illumina_adapters)
     """
     trimmomatic PE \\
         -threads ${task.cpus} \\
@@ -41,13 +40,12 @@ process BRESEQ {
     publishDir params.outdir, mode: 'copy'
 
     input:
-    tuple val(sample_id), path(read1), path(read2)
+    tuple val(sample_id), path(read1), path(read2), path(reference_seq)
 
     output:
     path("$sample_id"), emit: results
 
     script:
-    def reference_seq = file(params.reference_seq)
     """
     breseq \\
         -j ${task.cpus} \\
@@ -86,13 +84,13 @@ process MULTIQC {
 
     input:
     path("*")
+    path(multiqc_config)
 
     output:
     path("multiqc_report.html"), emit: report
     path("multiqc_data"), emit: data
 
     script:
-    def multiqc_config = file("multiqc_config.yml")
     """
     multiqc --config ${multiqc_config} .
     """
@@ -101,15 +99,18 @@ process MULTIQC {
 /* Workflow */
 workflow {
     reads_ch = Channel.fromFilePairs(params.reads, checkIfExists: true)
+    reference_ch = Channel.fromPath(params.params.reference_seq, checkIfExists: true)
+    illumina_adapters_ch = Channel.fromPath(params.illumina_adapters, checkIfExists: true)
 
+    multiqc_config_ch = Channel.fromPath("multiqc_config.yml", checkIfExists: true)
     multiqc_files_ch = Channel.empty()
 
     TRIMMOMATIC(reads_ch)
     FASTQC(reads_ch)
-    BRESEQ(TRIMMOMATIC.out.reads)
+    BRESEQ(TRIMMOMATIC.out.reads.combine(reference_ch))
     
     multiqc_files_ch = multiqc_files_ch.mix(FASTQC.out.stats)
     multiqc_files_ch = multiqc_files_ch.mix(TRIMMOMATIC.out.log)
     multiqc_files_ch = multiqc_files_ch.collect()
-    MULTIQC(multiqc_files_ch) 
+    MULTIQC(multiqc_files_ch, multiqc_config_ch) 
 }

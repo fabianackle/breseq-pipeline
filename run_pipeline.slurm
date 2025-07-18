@@ -10,8 +10,10 @@ module load mamba
 eval "$(conda shell.bash hook)"
 conda activate nextflow
 
+module load singularityce
+
 nextflow run main.nf \
-    -profile cluster \
+    -profile cluster,singularity \
     -resume \
     -with-report \
     -with-timeline \
