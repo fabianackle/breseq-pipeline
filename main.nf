@@ -13,7 +13,7 @@ process TRIMMOMATIC {
     tuple val(sample_id), path(reads), path(illumina_adapters)
 
     output:
-    tuple val(sample_id), path("${sample_id}_R1_trim_paired.fastq.gz"), path("${sample_id}_R2_trim_paired.fastq.gz"), emit: reads
+    tuple val(sample_id), path("${sample_id}_R1_trim_paired.fastq.gz"), path("${sample_id}_R2_trim_paired.fastq.gz"), emit: trimmed_reads
     path("${sample_id}_trim_out.log"), emit: log
 
     script:
@@ -107,7 +107,7 @@ workflow {
 
     TRIMMOMATIC(reads_ch.combine(reference_ch))
     FASTQC(reads_ch)
-    BRESEQ(TRIMMOMATIC.out.reads.combine(reference_ch))
+    BRESEQ(TRIMMOMATIC.out.trimmed_reads.combine(reference_ch))
     
     multiqc_files_ch = multiqc_files_ch.mix(FASTQC.out.stats)
     multiqc_files_ch = multiqc_files_ch.mix(TRIMMOMATIC.out.log)
