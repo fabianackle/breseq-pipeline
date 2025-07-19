@@ -105,7 +105,7 @@ workflow {
     multiqc_config_ch = Channel.fromPath("multiqc_config.yml", checkIfExists: true)
     multiqc_files_ch = Channel.empty()
 
-    TRIMMOMATIC(reads_ch.combine(reference_ch))
+    TRIMMOMATIC(reads_ch.combine(illumina_adapters_ch))
     FASTQC(reads_ch)
     BRESEQ(TRIMMOMATIC.out.trimmed_reads.combine(reference_ch))
     
